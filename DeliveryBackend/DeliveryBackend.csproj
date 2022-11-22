@@ -25,6 +25,7 @@
       <Folder Include="Data\Models\DTO" />
       <Folder Include="Data\Models\Entities" />
       <Folder Include="Data\Models\Enums" />
+      <Folder Include="Exceptions" />
       <Folder Include="Services\Interfaces" />
       <Folder Include="Services\Repositories" />
     </ItemGroup>
