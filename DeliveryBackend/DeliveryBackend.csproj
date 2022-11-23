@@ -22,7 +22,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Data\Models\Entities" />
       <Folder Include="Services\Interfaces" />
       <Folder Include="Services\Repositories" />
     </ItemGroup>
