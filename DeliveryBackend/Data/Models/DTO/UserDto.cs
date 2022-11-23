@@ -14,7 +14,7 @@ public class UserDto
     public Gender gender { get; set; }
     public string? address { get; set; }
     [MinLength(1)]
-    [RegularExpression(@"[a-zA-Z]+\w*@[a-zA-Z]+\.[a-zA-Z]+")]
+    [EmailAddress]
     public string? email { get; set; }
     [Phone]
     public string? phoneNumber { get; set; }

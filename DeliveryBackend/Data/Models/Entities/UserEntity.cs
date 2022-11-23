@@ -9,16 +9,16 @@ public class UserEntity
     [Required]
     [MinLength(1)]
     public string FullName { get; set; }
-    public DateTime BirthDate { get; set; }
+    public DateTime? BirthDate { get; set; }
     [Required]
     public Gender Gender { get; set; }
     [Phone]
-    public string PhoneNumber { get; set; }
+    public string? PhoneNumber { get; set; }
     [Required]
     [MinLength(1)]
-    [RegularExpression(@"[a-zA-Z]+\w*@[a-zA-Z]+\.[a-zA-Z]+")]
+    [EmailAddress]
     public string Email { get; set; }
-    public string Address { get; set; }
+    public string? Address { get; set; }
     [Required]
     [MinLength(6)]
     public string Password { get; set; }

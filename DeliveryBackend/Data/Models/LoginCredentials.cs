@@ -6,7 +6,7 @@ public class LoginCredentials
 {
     [Required]
     [MinLength(1)]
-    [RegularExpression(@"[a-zA-Z]+\w*@[a-zA-Z]+\.[a-zA-Z]+")]
+    [EmailAddress]
     public string email { get; set; }
     [Required]
     [MinLength(1)]

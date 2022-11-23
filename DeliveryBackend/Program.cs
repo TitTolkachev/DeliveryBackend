@@ -1,5 +1,6 @@
 using DeliveryBackend.Data;
 using DeliveryBackend.Services;
+using DeliveryBackend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql
 
 // Services
 builder.Services.AddScoped<IWeatherService, WeatherService>();
+builder.Services.AddScoped<IUsersService, UsersService>();
 
 // Build App
 var app = builder.Build();

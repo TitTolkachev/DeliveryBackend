@@ -13,7 +13,7 @@ public class UserRegisterModel
     public string password { get; set; }
     [Required]
     [MinLength(1)]
-    [RegularExpression(@"[a-zA-Z]+\w*@[a-zA-Z]+\.[a-zA-Z]+")]
+    [EmailAddress]
     public string email { get; set; }
     public string? address { get; set; }
     public DateTime? birthDate { get; set; }
