@@ -1,5 +1,5 @@
 ﻿using DeliveryBackend.Data;
-using DeliveryBackend.Data.Models;
+using DeliveryBackend.Data.Models.Entities;
 using DeliveryBackend.Data.Models.DTO;
 
 namespace DeliveryBackend.Services;

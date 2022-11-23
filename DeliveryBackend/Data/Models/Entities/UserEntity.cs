@@ -21,4 +21,8 @@ public class UserEntity
     [Required]
     [MinLength(6)]
     public string Password { get; set; }
+    
+    public List<RatingEntity> Ratings { get; set; }
+    public List<OrderEntity> Orders { get; set; }
+    public List<CartEntity> Carts { get; set; }
 }

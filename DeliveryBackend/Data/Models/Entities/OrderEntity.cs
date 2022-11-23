@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using DeliveryBackend.Data.Models.Enums;
 
 namespace DeliveryBackend.Data.Models.Entities;
@@ -15,10 +16,14 @@ public class OrderEntity
     [Required]
     public double Price { get; set; }
     [Required]
-    public List<DishEntity?> Dishes { get; set; }
-    [Required]
     [MinLength(1)]
     public string Address { get; set; }
+    
     [Required]
+    public Guid UserId { get; set; }
+    [Required]
+    [ForeignKey("UserId")]
     public UserEntity User { get; set; }
+    
+    public List<CartEntity> Carts { get; set; }
 }
