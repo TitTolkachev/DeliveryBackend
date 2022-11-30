@@ -19,15 +19,15 @@ public class BasketService : IBasketService
     {
         //TODO(Накидать Exceptions)
         var dishList = await _context.Carts.Where(x => x.UserId == userId).Join(
-                _context.Dishes, 
-                c => c.DishId, 
+                _context.Dishes,
+                c => c.DishId,
                 d => d.Id,
                 (c, d) => new DishBasketDto
                 {
                     id = c.Id,
                     name = d.Name,
                     price = d.Price,
-                    totalPrice = d.Price*c.Amount,
+                    totalPrice = d.Price * c.Amount,
                     amount = c.Amount,
                     image = d.Image
                 }
@@ -40,7 +40,8 @@ public class BasketService : IBasketService
     public async Task AddDishToCart(Guid dishId, Guid userId)
     {
         //TODO(Накидать Exceptions)
-        var dishCartEntity = await _context.Carts.Where(x => x.UserId == userId && x.DishId == dishId).FirstOrDefaultAsync();
+        var dishCartEntity =
+            await _context.Carts.Where(x => x.UserId == userId && x.DishId == dishId).FirstOrDefaultAsync();
 
         if (dishCartEntity == null)
         {
@@ -64,5 +65,18 @@ public class BasketService : IBasketService
     public async Task RemoveDishFromCart(Guid dishId, Guid userId)
     {
         //TODO(Накидать Exceptions)
+        var dishCartEntity =
+            await _context.Carts.Where(x => x.UserId == userId && x.DishId == dishId).FirstOrDefaultAsync();
+
+        if (dishCartEntity == null)
+        {
+            //TODO(Exception)
+            throw new Exception("Exception |_|");
+        }
+
+        dishCartEntity.Amount--;
+        if (dishCartEntity.Amount == 0)
+            _context.Carts.Remove(dishCartEntity);
+        await _context.SaveChangesAsync();
     }
 }
