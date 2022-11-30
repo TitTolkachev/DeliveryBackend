@@ -14,7 +14,7 @@ public class CartEntity
     public DishEntity DishEntity { get; set; }
     
     [Required]
-    public int Count { get; set; }
+    public int Amount { get; set; }
     
     [Required]
     public Guid UserId { get; set; }
