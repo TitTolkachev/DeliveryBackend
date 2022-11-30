@@ -1,12 +1,10 @@
-﻿using DeliveryBackend.Data.Models;
-using DeliveryBackend.Data.Models.Entities;
+﻿using DeliveryBackend.Data.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DeliveryBackend.Data;
 
 public class ApplicationDbContext : DbContext
 {
-    public DbSet<WeatherForecast> WeatherForecasts { get; set; }
     public DbSet<RatingEntity> Ratings { get; set; }
     public DbSet<DishEntity> Dishes { get; set; }
     public DbSet<OrderEntity> Orders { get; set; }
@@ -20,8 +18,6 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<WeatherForecast>().HasKey(x => x.Id);
-
         modelBuilder.Entity<RatingEntity>().HasKey(x => x.Id);
         modelBuilder.Entity<RatingEntity>()
             .HasIndex(x => new { x.DishId, x.UserId })
