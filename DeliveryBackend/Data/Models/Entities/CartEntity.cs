@@ -21,10 +21,8 @@ public class CartEntity
     [Required]
     [ForeignKey("UserId")]
     public UserEntity UserEntity { get; set; }
-    
-    [Required]
+
     public Guid? OrderId { get; set; }
-    [Required]
     [ForeignKey("OrderId")]
-    public OrderEntity? OrderEntity { get; set; }
+    public virtual OrderEntity OrderEntity { get; set; }
 }
