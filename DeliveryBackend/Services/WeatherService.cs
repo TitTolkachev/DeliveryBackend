@@ -1,6 +1,6 @@
 ﻿using DeliveryBackend.Data;
-using DeliveryBackend.Data.Models;
 using DeliveryBackend.Data.Models.DTO;
+using DeliveryBackend.Data.Models.Entities;
 
 namespace DeliveryBackend.Services;
 
