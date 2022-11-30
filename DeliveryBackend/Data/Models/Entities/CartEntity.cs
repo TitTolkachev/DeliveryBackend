@@ -14,17 +14,15 @@ public class CartEntity
     public DishEntity DishEntity { get; set; }
     
     [Required]
-    public int Count { get; set; }
+    public int Amount { get; set; }
     
     [Required]
     public Guid UserId { get; set; }
     [Required]
     [ForeignKey("UserId")]
     public UserEntity UserEntity { get; set; }
-    
-    [Required]
+
     public Guid? OrderId { get; set; }
-    [Required]
     [ForeignKey("OrderId")]
-    public OrderEntity? OrderEntity { get; set; }
+    public virtual OrderEntity OrderEntity { get; set; }
 }

@@ -19,6 +19,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql
 // Services
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IDishService, DishService>();
+builder.Services.AddScoped<IBasketService, BasketService>();
 
 // Auth
 builder.Services.AddAuthorization();
