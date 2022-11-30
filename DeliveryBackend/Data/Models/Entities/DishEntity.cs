@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using DeliveryBackend.Data.Models.Enums;
 
 namespace DeliveryBackend.Data.Models.Entities;

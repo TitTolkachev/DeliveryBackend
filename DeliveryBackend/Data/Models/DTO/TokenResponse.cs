@@ -1,4 +1,4 @@
-﻿namespace DeliveryBackend.Data.Models;
+﻿namespace DeliveryBackend.Data.Models.DTO;
 
 public class TokenResponse
 {

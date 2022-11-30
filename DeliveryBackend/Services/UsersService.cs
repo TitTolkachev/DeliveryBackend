@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using DeliveryBackend.Configurations;
 using DeliveryBackend.Data;
-using DeliveryBackend.Data.Models;
+using DeliveryBackend.Data.Models.DTO;
 using DeliveryBackend.Data.Models.Entities;
 using DeliveryBackend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -24,10 +24,10 @@ public class UsersService : IUsersService
         //TODO (сделать нормализацию входных данных)
         //userRegisterModel.email = NormalizeAttribute(userRegisterModel.email);
         //userRegisterModel.fullName = NormalizeAttribute(userRegisterModel.fullName);
-        
-        
+
+
         //TODO (сделать проверку на уникальность входных данных)
-        
+
         await _context.Users.AddAsync(new UserEntity
         {
             Id = Guid.NewGuid(),
@@ -38,16 +38,15 @@ public class UsersService : IUsersService
             Gender = userRegisterModel.gender,
             Password = userRegisterModel.password,
             PhoneNumber = userRegisterModel.phoneNumber,
-            
         });
         await _context.SaveChangesAsync();
-        
+
         var credentials = new LoginCredentials
         {
             email = userRegisterModel.email,
             password = userRegisterModel.password
         };
-        
+
         return await LoginUser(credentials);
     }
 
@@ -78,7 +77,56 @@ public class UsersService : IUsersService
 
         return result;
     }
-    
+
+    public async Task<UserDto> GetUserProfile(Guid userId)
+    {
+        var userEntity = await _context
+            .Users
+            .FirstOrDefaultAsync(x => x.Id == userId);
+
+        if (userEntity == null)
+        {
+            //TODO(сделать эксцепшн)
+            throw new Exception("Lol, you're not found -_-");
+        }
+
+        return new UserDto
+        {
+            id = userEntity.Id,
+            fullName = userEntity.FullName,
+            birthDate = userEntity.BirthDate,
+            gender = userEntity.Gender,
+            address = userEntity.Address,
+            email = userEntity.Email,
+            phoneNumber = userEntity.PhoneNumber
+        };
+    }
+
+
+    public async Task EditUserProfile(Guid userId, UserEditModel userEditModel)
+    {
+        var userEntity = await _context
+            .Users
+            .FirstOrDefaultAsync(x => x.Id == userId);
+
+        if (userEntity == null)
+        {
+            //TODO(сделать эксцепшн)
+            throw new Exception("Lol, you're not found -_-");
+        }
+        
+        //TODO (сделать все остальные проверки на входные данные)
+
+        userEntity.FullName = userEditModel.fullName;
+        userEntity.BirthDate = userEditModel.birthDate;
+        userEntity.Address = userEditModel.address;
+        userEntity.Gender = userEditModel.gender;
+        userEntity.PhoneNumber = userEditModel.phoneNumber;
+        
+        await _context.SaveChangesAsync();
+    }
+
+
     private async Task<ClaimsIdentity> GetIdentity(string email, string password)
     {
         var userEntity = await _context
@@ -94,7 +142,7 @@ public class UsersService : IUsersService
 
         var claims = new List<Claim>
         {
-            new (ClaimsIdentity.DefaultNameClaimType, userEntity.Id.ToString())
+            new(ClaimsIdentity.DefaultNameClaimType, userEntity.Id.ToString())
         };
 
         var claimsIdentity = new ClaimsIdentity
