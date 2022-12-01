@@ -31,6 +31,7 @@ builder.Services.AddMvc();
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IDishService, DishService>();
 builder.Services.AddScoped<IBasketService, BasketService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 // Auth
 builder.Services.AddAuthorization();

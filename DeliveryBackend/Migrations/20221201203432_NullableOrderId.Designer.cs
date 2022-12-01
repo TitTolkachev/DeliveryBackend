@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DeliveryBackend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20221123143622_Test2AddEntities")]
-    partial class Test2AddEntities
+    [Migration("20221201203432_NullableOrderId")]
+    partial class NullableOrderId
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,20 +25,19 @@ namespace DeliveryBackend.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.CartEntity", b =>
+            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.Cart", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Count")
+                    b.Property<int>("Amount")
                         .HasColumnType("integer");
 
                     b.Property<Guid>("DishId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("OrderId")
-                        .IsRequired()
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("UserId")
@@ -56,7 +55,7 @@ namespace DeliveryBackend.Migrations
                     b.ToTable("Carts");
                 });
 
-            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.DishEntity", b =>
+            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.Dish", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -88,7 +87,7 @@ namespace DeliveryBackend.Migrations
                     b.ToTable("Dishes");
                 });
 
-            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.OrderEntity", b =>
+            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.Order", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -120,7 +119,7 @@ namespace DeliveryBackend.Migrations
                     b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.RatingEntity", b =>
+            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.Rating", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -129,7 +128,7 @@ namespace DeliveryBackend.Migrations
                     b.Property<Guid>("DishId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Rating")
+                    b.Property<int>("RatingScore")
                         .HasColumnType("integer");
 
                     b.Property<Guid>("UserId")
@@ -145,17 +144,16 @@ namespace DeliveryBackend.Migrations
                     b.ToTable("Ratings");
                 });
 
-            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.UserEntity", b =>
+            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("BirthDate")
+                    b.Property<DateTime?>("BirthDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
@@ -174,7 +172,6 @@ namespace DeliveryBackend.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -182,58 +179,34 @@ namespace DeliveryBackend.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.WeatherForecast", b =>
+            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.Cart", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Summary")
-                        .HasColumnType("text");
-
-                    b.Property<int>("TemperatureC")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("WeatherForecasts");
-                });
-
-            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.CartEntity", b =>
-                {
-                    b.HasOne("DeliveryBackend.Data.Models.Entities.DishEntity", "DishEntity")
+                    b.HasOne("DeliveryBackend.Data.Models.Entities.Dish", "Dish")
                         .WithMany("Carts")
                         .HasForeignKey("DishId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DeliveryBackend.Data.Models.Entities.OrderEntity", "OrderEntity")
+                    b.HasOne("DeliveryBackend.Data.Models.Entities.Order", "Order")
                         .WithMany("Carts")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OrderId");
 
-                    b.HasOne("DeliveryBackend.Data.Models.Entities.UserEntity", "UserEntity")
+                    b.HasOne("DeliveryBackend.Data.Models.Entities.User", "User")
                         .WithMany("Carts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("DishEntity");
+                    b.Navigation("Dish");
 
-                    b.Navigation("OrderEntity");
+                    b.Navigation("Order");
 
-                    b.Navigation("UserEntity");
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.OrderEntity", b =>
+            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.Order", b =>
                 {
-                    b.HasOne("DeliveryBackend.Data.Models.Entities.UserEntity", "User")
+                    b.HasOne("DeliveryBackend.Data.Models.Entities.User", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -242,38 +215,38 @@ namespace DeliveryBackend.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.RatingEntity", b =>
+            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.Rating", b =>
                 {
-                    b.HasOne("DeliveryBackend.Data.Models.Entities.DishEntity", "DishEntity")
+                    b.HasOne("DeliveryBackend.Data.Models.Entities.Dish", "Dish")
                         .WithMany("Ratings")
                         .HasForeignKey("DishId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DeliveryBackend.Data.Models.Entities.UserEntity", "UserEntity")
+                    b.HasOne("DeliveryBackend.Data.Models.Entities.User", "User")
                         .WithMany("Ratings")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("DishEntity");
+                    b.Navigation("Dish");
 
-                    b.Navigation("UserEntity");
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.DishEntity", b =>
+            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.Dish", b =>
                 {
                     b.Navigation("Carts");
 
                     b.Navigation("Ratings");
                 });
 
-            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.OrderEntity", b =>
+            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.Order", b =>
                 {
                     b.Navigation("Carts");
                 });
 
-            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.UserEntity", b =>
+            modelBuilder.Entity("DeliveryBackend.Data.Models.Entities.User", b =>
                 {
                     b.Navigation("Carts");
 

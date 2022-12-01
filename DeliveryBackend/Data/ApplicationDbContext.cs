@@ -33,5 +33,8 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Cart>()
             .HasIndex(x => new { x.DishId, x.UserId, x.OrderId })
             .IsUnique();
+        modelBuilder.Entity<Cart>()
+            .Property(x=>x.OrderId)
+            .IsRequired(false);
     }
 }

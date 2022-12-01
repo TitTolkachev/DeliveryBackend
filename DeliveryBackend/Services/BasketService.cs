@@ -18,7 +18,7 @@ public class BasketService : IBasketService
     public async Task<List<DishBasketDto>> GetUserCart(Guid userId)
     {
         //TODO(Накидать Exceptions)
-        var dishList = await _context.Carts.Where(x => x.UserId == userId).Join(
+        var dishList = await _context.Carts.Where(x => x.UserId == userId && x.OrderId == null).Join(
                 _context.Dishes,
                 c => c.DishId,
                 d => d.Id,
