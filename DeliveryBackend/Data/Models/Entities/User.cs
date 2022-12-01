@@ -3,7 +3,7 @@ using DeliveryBackend.Data.Models.Enums;
 
 namespace DeliveryBackend.Data.Models.Entities;
 
-public class UserEntity
+public class User
 {
     public Guid Id { get; set; }
     [Required]
@@ -23,7 +23,7 @@ public class UserEntity
     [MinLength(6)]
     public string Password { get; set; }
     
-    public List<RatingEntity> Ratings { get; set; }
-    public List<OrderEntity> Orders { get; set; }
-    public List<CartEntity> Carts { get; set; }
+    public List<Rating> Ratings { get; set; }
+    public List<Order> Orders { get; set; }
+    public List<Cart> Carts { get; set; }
 }

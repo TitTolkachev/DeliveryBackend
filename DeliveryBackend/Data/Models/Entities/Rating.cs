@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DeliveryBackend.Data.Models.Entities;
 
-public class RatingEntity
+public class Rating
 {
     public Guid Id { get; set; }
     
@@ -11,14 +11,14 @@ public class RatingEntity
     public Guid DishId { get; set; }
     [Required]
     [ForeignKey("DishId")]
-    public DishEntity DishEntity { get; set; }
+    public Dish Dish { get; set; }
     
     [Required]
     public Guid UserId { get; set; }
     [Required]
     [ForeignKey("UserId")]
-    public UserEntity UserEntity { get; set; }
+    public User User { get; set; }
     
     [Required]
-    public int Rating { get; set; }
+    public int RatingScore { get; set; }
 }

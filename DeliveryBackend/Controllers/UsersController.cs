@@ -1,4 +1,4 @@
-﻿using DeliveryBackend.Data.Models.DTO;
+﻿using DeliveryBackend.DTO;
 using DeliveryBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

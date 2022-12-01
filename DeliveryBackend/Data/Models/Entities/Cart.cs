@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DeliveryBackend.Data.Models.Entities;
 
-public class CartEntity
+public class Cart
 {
     public Guid Id { get; set; }
     
@@ -11,7 +11,7 @@ public class CartEntity
     public Guid DishId { get; set; }
     [Required]
     [ForeignKey("DishId")]
-    public DishEntity DishEntity { get; set; }
+    public Dish Dish { get; set; }
     
     [Required]
     public int Amount { get; set; }
@@ -20,9 +20,9 @@ public class CartEntity
     public Guid UserId { get; set; }
     [Required]
     [ForeignKey("UserId")]
-    public UserEntity UserEntity { get; set; }
+    public User User { get; set; }
 
     public Guid? OrderId { get; set; }
     [ForeignKey("OrderId")]
-    public virtual OrderEntity OrderEntity { get; set; }
+    public virtual Order Order { get; set; }
 }

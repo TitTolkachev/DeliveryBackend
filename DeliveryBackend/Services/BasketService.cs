@@ -1,5 +1,5 @@
 ﻿using DeliveryBackend.Data;
-using DeliveryBackend.Data.Models.DTO;
+using DeliveryBackend.DTO;
 using DeliveryBackend.Data.Models.Entities;
 using DeliveryBackend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -24,12 +24,12 @@ public class BasketService : IBasketService
                 d => d.Id,
                 (c, d) => new DishBasketDto
                 {
-                    id = c.Id,
-                    name = d.Name,
-                    price = d.Price,
-                    totalPrice = d.Price * c.Amount,
-                    amount = c.Amount,
-                    image = d.Image
+                    Id = c.Id,
+                    Name = d.Name,
+                    Price = d.Price,
+                    TotalPrice = d.Price * c.Amount,
+                    Amount = c.Amount,
+                    Image = d.Image
                 }
             )
             .ToListAsync();
@@ -45,7 +45,7 @@ public class BasketService : IBasketService
 
         if (dishCartEntity == null)
         {
-            await _context.Carts.AddAsync(new CartEntity
+            await _context.Carts.AddAsync(new Cart
             {
                 Id = Guid.NewGuid(),
                 DishId = dishId,

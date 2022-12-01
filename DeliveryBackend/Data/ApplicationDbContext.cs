@@ -5,11 +5,11 @@ namespace DeliveryBackend.Data;
 
 public class ApplicationDbContext : DbContext
 {
-    public DbSet<RatingEntity> Ratings { get; set; }
-    public DbSet<DishEntity> Dishes { get; set; }
-    public DbSet<OrderEntity> Orders { get; set; }
-    public DbSet<UserEntity> Users { get; set; }
-    public DbSet<CartEntity> Carts { get; set; }
+    public DbSet<Rating> Ratings { get; set; }
+    public DbSet<Dish> Dishes { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<Cart> Carts { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
@@ -18,19 +18,19 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<RatingEntity>().HasKey(x => x.Id);
-        modelBuilder.Entity<RatingEntity>()
+        modelBuilder.Entity<Rating>().HasKey(x => x.Id);
+        modelBuilder.Entity<Rating>()
             .HasIndex(x => new { x.DishId, x.UserId })
             .IsUnique();
         
-        modelBuilder.Entity<DishEntity>().HasKey(x => x.Id);
+        modelBuilder.Entity<Dish>().HasKey(x => x.Id);
         
-        modelBuilder.Entity<OrderEntity>().HasKey(x => x.Id);
+        modelBuilder.Entity<Order>().HasKey(x => x.Id);
         
-        modelBuilder.Entity<UserEntity>().HasKey(x => x.Id);
+        modelBuilder.Entity<User>().HasKey(x => x.Id);
         
-        modelBuilder.Entity<CartEntity>().HasKey(x => x.Id);
-        modelBuilder.Entity<CartEntity>()
+        modelBuilder.Entity<Cart>().HasKey(x => x.Id);
+        modelBuilder.Entity<Cart>()
             .HasIndex(x => new { x.DishId, x.UserId, x.OrderId })
             .IsUnique();
     }

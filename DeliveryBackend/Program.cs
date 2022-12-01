@@ -1,5 +1,7 @@
+using AutoMapper;
 using DeliveryBackend.Configurations;
 using DeliveryBackend.Data;
+using DeliveryBackend.Mappings;
 using DeliveryBackend.Services;
 using DeliveryBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -15,6 +17,15 @@ builder.Services.AddSwaggerGen();
 // DB
 var connection = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connection));
+
+// AutoMapping
+var mapperConfig = new MapperConfiguration(mc =>
+{
+    mc.AddProfile(new MappingProfile());
+});
+var mapper = mapperConfig.CreateMapper();
+builder.Services.AddSingleton(mapper);
+builder.Services.AddMvc();
 
 // Services
 builder.Services.AddScoped<IUsersService, UsersService>();

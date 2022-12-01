@@ -1,4 +1,4 @@
-﻿using DeliveryBackend.Data.Models.DTO;
+﻿using DeliveryBackend.DTO;
 
 namespace DeliveryBackend.Services.Interfaces;
 

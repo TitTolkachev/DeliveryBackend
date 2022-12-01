@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using DeliveryBackend.Configurations;
 using DeliveryBackend.Data;
-using DeliveryBackend.Data.Models.DTO;
+using DeliveryBackend.DTO;
 using DeliveryBackend.Data.Models.Entities;
 using DeliveryBackend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -28,23 +28,23 @@ public class UsersService : IUsersService
 
         //TODO (сделать проверку на уникальность входных данных)
 
-        await _context.Users.AddAsync(new UserEntity
+        await _context.Users.AddAsync(new User
         {
             Id = Guid.NewGuid(),
-            FullName = userRegisterModel.fullName,
-            BirthDate = userRegisterModel.birthDate,
-            Address = userRegisterModel.address,
-            Email = userRegisterModel.email,
-            Gender = userRegisterModel.gender,
-            Password = userRegisterModel.password,
-            PhoneNumber = userRegisterModel.phoneNumber,
+            FullName = userRegisterModel.FullName,
+            BirthDate = userRegisterModel.BirthDate,
+            Address = userRegisterModel.Address,
+            Email = userRegisterModel.Email,
+            Gender = userRegisterModel.Gender,
+            Password = userRegisterModel.Password,
+            PhoneNumber = userRegisterModel.PhoneNumber,
         });
         await _context.SaveChangesAsync();
 
         var credentials = new LoginCredentials
         {
-            email = userRegisterModel.email,
-            password = userRegisterModel.password
+            Email = userRegisterModel.Email,
+            Password = userRegisterModel.Password
         };
 
         return await LoginUser(credentials);
@@ -55,7 +55,7 @@ public class UsersService : IUsersService
         //TODO (normilize)
         //credentials.username = NormalizeAttribute(credentials.email);
 
-        var identity = await GetIdentity(credentials.email, credentials.password);
+        var identity = await GetIdentity(credentials.Email, credentials.Password);
 
         var now = DateTime.UtcNow;
 
@@ -72,7 +72,7 @@ public class UsersService : IUsersService
 
         var result = new TokenResponse()
         {
-            token = encodeJwt
+            Token = encodeJwt
         };
 
         return result;
@@ -92,13 +92,13 @@ public class UsersService : IUsersService
 
         return new UserDto
         {
-            id = userEntity.Id,
-            fullName = userEntity.FullName,
-            birthDate = userEntity.BirthDate,
-            gender = userEntity.Gender,
-            address = userEntity.Address,
-            email = userEntity.Email,
-            phoneNumber = userEntity.PhoneNumber
+            Id = userEntity.Id,
+            FullName = userEntity.FullName,
+            BirthDate = userEntity.BirthDate,
+            Gender = userEntity.Gender,
+            Address = userEntity.Address,
+            Email = userEntity.Email,
+            PhoneNumber = userEntity.PhoneNumber
         };
     }
 
@@ -117,11 +117,11 @@ public class UsersService : IUsersService
         
         //TODO (сделать все остальные проверки на входные данные)
 
-        userEntity.FullName = userEditModel.fullName;
-        userEntity.BirthDate = userEditModel.birthDate;
-        userEntity.Address = userEditModel.address;
-        userEntity.Gender = userEditModel.gender;
-        userEntity.PhoneNumber = userEditModel.phoneNumber;
+        userEntity.FullName = userEditModel.FullName;
+        userEntity.BirthDate = userEditModel.BirthDate;
+        userEntity.Address = userEditModel.Address;
+        userEntity.Gender = userEditModel.Gender;
+        userEntity.PhoneNumber = userEditModel.PhoneNumber;
         
         await _context.SaveChangesAsync();
     }

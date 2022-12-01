@@ -1,6 +1,6 @@
 ﻿using DeliveryBackend.Data;
-using DeliveryBackend.Data.Models.DTO;
-using DeliveryBackend.Data.Models.DTO.Queries;
+using DeliveryBackend.DTO;
+using DeliveryBackend.DTO.Queries;
 using DeliveryBackend.Data.Models.Entities;
 using DeliveryBackend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -24,15 +24,15 @@ public class DishService : IDishService
         //TODO(в паганиции возвращать тоже адекватные значения)
         var pagination = new PageInfoModel
         {
-            size = 1,
-            count = 1,
-            current = 1
+            Size = 1,
+            Count = 1,
+            Current = 1
         };
 
         return new DishPagedListDto
         {
-            dishes = ConvertDishes(dishes),
-            paginagion = pagination
+            Dishes = ConvertDishes(dishes),
+            Pagination = pagination
         };
     }
 
@@ -45,20 +45,20 @@ public class DishService : IDishService
         //TODO(Exception)
         if (dishEntity == null)
         {
-            throw new Exception("Lol");
+            throw new KeyNotFoundException("Lol");
         }
 
         return new DishDto
         {
-            category = dishEntity.Category,
-            description = dishEntity.Description,
-            id = dishEntity.Id,
-            image = dishEntity.Image,
-            name = dishEntity.Name,
-            price = dishEntity.Price,
+            Category = dishEntity.Category,
+            Description = dishEntity.Description,
+            Id = dishEntity.Id,
+            Image = dishEntity.Image,
+            Name = dishEntity.Name,
+            Price = dishEntity.Price,
             //TODO(Высчитывать рейтинг, либо сразу хранить его в бд)
-            rating = dishEntity.Price,
-            vegetarian = dishEntity.Vegetarian
+            Rating = dishEntity.Price,
+            Vegetarian = dishEntity.Vegetarian
         };
     }
 
@@ -75,12 +75,12 @@ public class DishService : IDishService
         if (ratingEntity == null)
         {
             //TODO(Слелать проверку на коррентные id и рейтинг)
-            _context.Ratings.Add(new RatingEntity
+            _context.Ratings.Add(new Rating
             {
                 Id = Guid.NewGuid(),
                 DishId = id,
                 UserId = userId,
-                Rating = rating
+                RatingScore = rating
             });
             await _context.SaveChangesAsync();
         }
@@ -91,32 +91,26 @@ public class DishService : IDishService
         }
     }
 
-    private static List<DishDto?> ConvertDishes(List<DishEntity>? dishes)
+    private static List<DishDto> ConvertDishes(List<Dish> dishes)
     {
-        var res = new List<DishDto?>();
-
         if (dishes == null)
         {
             //TODO(Exception)
             throw new Exception("LoL )_(");
         }
 
-        foreach (var dishEntity in dishes)
-        {
-            res.Add(new DishDto
+        return dishes.Select(dishEntity => new DishDto
             {
-                category = dishEntity.Category,
-                description = dishEntity.Description,
-                id = dishEntity.Id,
-                image = dishEntity.Image,
-                name = dishEntity.Name,
-                price = dishEntity.Price,
+                Category = dishEntity.Category,
+                Description = dishEntity.Description,
+                Id = dishEntity.Id,
+                Image = dishEntity.Image,
+                Name = dishEntity.Name,
+                Price = dishEntity.Price,
                 //TODO(Высчитывать рейтинг, либо сразу хранить его в бд)
-                rating = dishEntity.Price,
-                vegetarian = dishEntity.Vegetarian
-            });
-        }
-
-        return res;
+                Rating = dishEntity.Price,
+                Vegetarian = dishEntity.Vegetarian
+            })
+            .ToList();
     }
 }

@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DeliveryBackend.Data.Models.DTO;
+namespace DeliveryBackend.DTO;
 
 public class OrderCreateDto
 {
     [Required]
-    public DateTime deliveryTime { get; set; }
+    public DateTime DeliveryTime { get; set; }
     [Required]
     [MinLength(1)]
-    public string address { get; set; }
+    public string Address { get; set; }
 }
