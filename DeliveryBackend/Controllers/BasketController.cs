@@ -2,6 +2,7 @@
 using DeliveryBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace DeliveryBackend.Controllers;
 
@@ -18,6 +19,7 @@ public class BasketController : ControllerBase
     
     [HttpGet]
     [Authorize]
+    [SwaggerOperation(Summary = "Get user cart")]
     public async Task<List<DishBasketDto>> GetUserCart()
     {
         return await _basketService.GetUserCart(Guid.Parse(User.Identity.Name));

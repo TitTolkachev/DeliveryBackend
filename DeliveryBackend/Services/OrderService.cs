@@ -20,21 +20,57 @@ public class OrderService : IOrderService
         _mapper = mapper;
     }
 
-    // public Task<OrderDto> GetOrderInfo(Guid userId)
-    // {
-    //     
-    // }
-    //
-    // public Task<List<OrderInfoDto>> GetOrders(Guid userId)
-    // {
-    //     
-    // }
+    public async Task<OrderDto> GetOrderInfo(Guid userId, Guid orderId)
+    {
+        var orderInfo = await _context.Orders.FirstOrDefaultAsync(x => x.Id == orderId);
+        var orderCarts = await _context.Carts.Where(x => x.OrderId == orderId).ToListAsync();
+        var dishes = await _context.Dishes.Where(x => orderCarts.Exists(y => y.DishId == x.Id)).ToListAsync();
+
+        //TODO(Exception)
+        if (orderInfo == null)
+            throw new Exception("Order Info not found");
+
+        var convertedDishes = (from orderCart in orderCarts
+        let dish = dishes.FirstOrDefault(x => x.Id == orderCart.DishId)
+        where dish != null
+        select new DishBasketDto
+        {
+            Id = dish.Id,
+            Name = dish.Name,
+            Price = dish.Price,
+            TotalPrice = orderCart.Amount * dish.Price,
+            Amount = orderCart.Amount,
+            Image = dish.Image
+        }).ToList();
+        
+        //TODO(Exception)
+        if (convertedDishes == null)
+            throw new Exception("Empty order list returned");
+        
+        return new OrderDto
+        {
+            Id = orderInfo.Id,
+            DeliveryTime = orderInfo.DeliveryTime,
+            OrderTime = orderInfo.OrderTime,
+            Status = orderInfo.Status,
+            Price = orderInfo.Price,
+            Dishes = convertedDishes,
+            Address = orderInfo.Address
+        };
+    }
+
+    public async Task<List<OrderInfoDto>> GetOrders(Guid userId)
+    {
+        var orders = await _context.Orders.Where(x => x.UserId == userId).ToListAsync();
+
+        return _mapper.Map<List<OrderInfoDto>>(orders);
+    }
 
     public async Task CreateOrder(Guid userId, OrderCreateDto orderCreateDto)
     {
         //TODO(Сделать проверку пришедшей дто)
 
-        
+
         //TODO(Проверка на то, есть ли что-то в корзине. Сейчас она в CreateOrderOperations)
         // В бд всем товарам в корзине проставить, что теперь они в заказе, заодно посчитать стоимость
         var orderId = Guid.NewGuid();
@@ -54,10 +90,20 @@ public class OrderService : IOrderService
         await _context.SaveChangesAsync();
     }
 
-    // public Task ConfirmOrderDelivery(Guid userId)
-    // {
-    //     
-    // }
+    public async Task ConfirmOrderDelivery(Guid userId, Guid orderId)
+    {
+        var order = await _context.Orders.FirstOrDefaultAsync(x => x.Id == orderId);
+
+        //TODO(Exception)
+        if (order == null)
+            throw new Exception("Order not found");
+
+        //TODO(Exception)
+        if (order.UserId != userId)
+            throw new Exception("UserId is not satisfied");
+
+        order.Status = OrderStatus.Delivered;
+    }
 
     private async Task<double> CreateOrderOperations(Guid orderId, Guid userId)
     {
@@ -84,6 +130,7 @@ public class OrderService : IOrderService
 
             res += cartDishes[i].Amount * dish.Price;
         }
+
         await _context.SaveChangesAsync();
 
         return res;
