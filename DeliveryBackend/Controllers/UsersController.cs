@@ -2,6 +2,7 @@
 using DeliveryBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace DeliveryBackend.Controllers;
 
@@ -18,6 +19,7 @@ public class UsersController : ControllerBase
 
     [HttpPost]
     [Route("register")]
+    [SwaggerOperation(Summary = "Register new user")]
     public async Task<TokenResponse> RegisterUser([FromBody] UserRegisterModel userRegisterDto)
     {
         return await _usersService.RegisterUser(userRegisterDto);
@@ -25,15 +27,18 @@ public class UsersController : ControllerBase
 
     [HttpPost]
     [Route("login")]
+    [SwaggerOperation(Summary = "Log in to the system")]
     public async Task<TokenResponse> Login([FromBody] LoginCredentials credentials)
     {
         return await _usersService.LoginUser(credentials);
     }
 
+    //TODO(Logout)
 
     [HttpGet]
     [Authorize]
     [Route("profile")]
+    [SwaggerOperation(Summary = "Get user profile")]
     public async Task<UserDto> GetUserProfile()
     {
         return await _usersService.GetUserProfile(
@@ -43,6 +48,7 @@ public class UsersController : ControllerBase
     [HttpPut]
     [Authorize]
     [Route("profile")]
+    [SwaggerOperation(Summary = "Edit user Profile")]
     public async Task EditUserProfile([FromBody] UserEditModel userEditModel)
     {
         await _usersService.EditUserProfile(

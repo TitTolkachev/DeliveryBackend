@@ -2,6 +2,7 @@
 using DeliveryBackend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace DeliveryBackend.Controllers;
 
@@ -19,6 +20,7 @@ public class OrderController : ControllerBase
     [HttpGet]
     [Authorize]
     [Route("{id}")]
+    [SwaggerOperation(Summary = "Get information about concrete order")]
     public async Task<OrderDto> GetOrderInfo(Guid id)
     {
         return await _orderService.GetOrderInfo(Guid.Parse(User.Identity.Name), id);
@@ -26,6 +28,7 @@ public class OrderController : ControllerBase
     
     [HttpGet]
     [Authorize]
+    [SwaggerOperation(Summary = "Get a list of orders")]
     public async Task<List<OrderInfoDto>> GetOrders()
     {
         return await _orderService.GetOrders(Guid.Parse(User.Identity.Name));
@@ -33,6 +36,7 @@ public class OrderController : ControllerBase
     
     [HttpPost]
     [Authorize]
+    [SwaggerOperation(Summary = "Creating the order from dishes in basket")]
     public async Task CreateOrder([FromBody] OrderCreateDto orderCreateDto)
     {
         await _orderService.CreateOrder(Guid.Parse(User.Identity.Name), orderCreateDto);
@@ -41,6 +45,7 @@ public class OrderController : ControllerBase
     [HttpPost]
     [Authorize]
     [Route("{id}/status")]
+    [SwaggerOperation(Summary = "Confirm order delivery")]
     public async Task ConfirmOrderDelivery(Guid id)
     {
         await _orderService.ConfirmOrderDelivery(Guid.Parse(User.Identity.Name), id);

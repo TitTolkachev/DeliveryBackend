@@ -28,6 +28,7 @@ public class BasketController : ControllerBase
     [HttpPost]
     [Authorize]
     [Route("dish/{dishId}")]
+    [SwaggerOperation(Summary = "Add dish to cart")]
     public async Task AddDishToCart(Guid dishId)
     {
         await _basketService.AddDishToCart(dishId, Guid.Parse(User.Identity.Name));
@@ -36,6 +37,7 @@ public class BasketController : ControllerBase
     [HttpDelete]
     [Authorize]
     [Route("dish/{dishId}")]
+    [SwaggerOperation(Summary = "Decrease the number of dishes in the cart(if increase = true), or remove the dish completely(increase = false)")]
     public async Task DecreaseDishQuantityInCart(Guid dishId)
     {
         await _basketService.RemoveDishFromCart(dishId, Guid.Parse(User.Identity.Name));

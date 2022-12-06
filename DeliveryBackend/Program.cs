@@ -18,7 +18,7 @@ builder.Services.AddSwaggerGen(c =>
     c.EnableAnnotations();
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "My Example API",
+        Title = "Delivery.Api",
         Version = "v1",
         Description = "The API for my application"
     });
