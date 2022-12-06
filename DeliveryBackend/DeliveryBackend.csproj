@@ -27,7 +27,6 @@
       <Folder Include="Data\Models\Entities" />
       <Folder Include="Data\Models\Enums" />
       <Folder Include="Exceptions" />
-      <Folder Include="Services\Repositories" />
     </ItemGroup>
 
 </Project>
