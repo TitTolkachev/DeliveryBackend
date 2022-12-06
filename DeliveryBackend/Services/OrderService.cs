@@ -26,7 +26,6 @@ public class OrderService : IOrderService
         var orderCarts = await _context.Carts.Where(x => x.OrderId == orderId).ToListAsync();
 
         var dishes = new List<Dish>();
-
         foreach (var orderCart in orderCarts)
         {
             var dish = await _context.Dishes.FirstOrDefaultAsync(x => x.Id == orderCart.DishId);
@@ -79,8 +78,8 @@ public class OrderService : IOrderService
     {
         //TODO(Сделать проверку пришедшей дто)
 
-
         //TODO(Проверка на то, есть ли что-то в корзине. Сейчас она в CreateOrderOperations)
+        
         // В бд всем товарам в корзине проставить, что теперь они в заказе, заодно посчитать стоимость
         var orderId = Guid.NewGuid();
         var newOrder = new Order
@@ -112,6 +111,7 @@ public class OrderService : IOrderService
             throw new Exception("UserId is not satisfied");
 
         order.Status = OrderStatus.Delivered;
+        await _context.SaveChangesAsync();
     }
 
     private async Task<double> CreateOrderOperations(Guid orderId, Guid userId)
