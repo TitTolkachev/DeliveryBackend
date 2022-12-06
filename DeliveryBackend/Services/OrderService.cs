@@ -24,29 +24,38 @@ public class OrderService : IOrderService
     {
         var orderInfo = await _context.Orders.FirstOrDefaultAsync(x => x.Id == orderId);
         var orderCarts = await _context.Carts.Where(x => x.OrderId == orderId).ToListAsync();
-        var dishes = await _context.Dishes.Where(x => orderCarts.Exists(y => y.DishId == x.Id)).ToListAsync();
 
+        var dishes = new List<Dish>();
+
+        foreach (var orderCart in orderCarts)
+        {
+            var dish = await _context.Dishes.FirstOrDefaultAsync(x => x.Id == orderCart.DishId);
+            //TODO(Exception)
+            if (dish != null)
+                dishes.Add(dish);
+        }
+        
         //TODO(Exception)
         if (orderInfo == null)
             throw new Exception("Order Info not found");
 
         var convertedDishes = (from orderCart in orderCarts
-        let dish = dishes.FirstOrDefault(x => x.Id == orderCart.DishId)
-        where dish != null
-        select new DishBasketDto
-        {
-            Id = dish.Id,
-            Name = dish.Name,
-            Price = dish.Price,
-            TotalPrice = orderCart.Amount * dish.Price,
-            Amount = orderCart.Amount,
-            Image = dish.Image
-        }).ToList();
-        
+            let dish = dishes.FirstOrDefault(x => x.Id == orderCart.DishId)
+            where dish != null
+            select new DishBasketDto
+            {
+                Id = dish.Id,
+                Name = dish.Name,
+                Price = dish.Price,
+                TotalPrice = orderCart.Amount * dish.Price,
+                Amount = orderCart.Amount,
+                Image = dish.Image
+            }).ToList();
+
         //TODO(Exception)
         if (convertedDishes == null)
             throw new Exception("Empty order list returned");
-        
+
         return new OrderDto
         {
             Id = orderInfo.Id,
