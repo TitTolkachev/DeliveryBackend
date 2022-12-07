@@ -19,6 +19,7 @@ public class OrderController : ControllerBase
     
     [HttpGet]
     [Authorize]
+    [Authorize(Policy = "ValidateToken")]
     [Route("{id}")]
     [SwaggerOperation(Summary = "Get information about concrete order")]
     public async Task<OrderDto> GetOrderInfo(Guid id)
@@ -28,6 +29,7 @@ public class OrderController : ControllerBase
     
     [HttpGet]
     [Authorize]
+    [Authorize(Policy = "ValidateToken")]
     [SwaggerOperation(Summary = "Get a list of orders")]
     public async Task<List<OrderInfoDto>> GetOrders()
     {
@@ -36,6 +38,7 @@ public class OrderController : ControllerBase
     
     [HttpPost]
     [Authorize]
+    [Authorize(Policy = "ValidateToken")]
     [SwaggerOperation(Summary = "Creating the order from dishes in basket")]
     public async Task CreateOrder([FromBody] OrderCreateDto orderCreateDto)
     {
@@ -44,6 +47,7 @@ public class OrderController : ControllerBase
     
     [HttpPost]
     [Authorize]
+    [Authorize(Policy = "ValidateToken")]
     [Route("{id}/status")]
     [SwaggerOperation(Summary = "Confirm order delivery")]
     public async Task ConfirmOrderDelivery(Guid id)

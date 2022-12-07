@@ -78,6 +78,22 @@ public class UsersService : IUsersService
         return result;
     }
 
+    public async Task Logout(string token)
+    {
+        var alreadyExistsToken = await _context.Tokens.FirstOrDefaultAsync(x => x.InvalidToken == token);
+
+        if (alreadyExistsToken == null)
+        {
+            _context.Tokens.Add(new Token { InvalidToken = token});
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            //TODO(Exception)
+            throw new Exception("Token is already invalid");
+        }
+    }
+
     public async Task<UserDto> GetUserProfile(Guid userId)
     {
         var userEntity = await _context
@@ -114,7 +130,7 @@ public class UsersService : IUsersService
             //TODO(сделать эксцепшн)
             throw new Exception("Lol, you're not found -_-");
         }
-        
+
         //TODO (сделать все остальные проверки на входные данные)
 
         userEntity.FullName = userEditModel.FullName;
@@ -122,7 +138,7 @@ public class UsersService : IUsersService
         userEntity.Address = userEditModel.Address;
         userEntity.Gender = userEditModel.Gender;
         userEntity.PhoneNumber = userEditModel.PhoneNumber;
-        
+
         await _context.SaveChangesAsync();
     }
 

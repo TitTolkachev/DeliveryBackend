@@ -19,6 +19,7 @@ public class BasketController : ControllerBase
     
     [HttpGet]
     [Authorize]
+    [Authorize(Policy = "ValidateToken")]
     [SwaggerOperation(Summary = "Get user cart")]
     public async Task<List<DishBasketDto>> GetUserCart()
     {
@@ -27,6 +28,7 @@ public class BasketController : ControllerBase
     
     [HttpPost]
     [Authorize]
+    [Authorize(Policy = "ValidateToken")]
     [Route("dish/{dishId}")]
     [SwaggerOperation(Summary = "Add dish to cart")]
     public async Task AddDishToCart(Guid dishId)
@@ -36,6 +38,7 @@ public class BasketController : ControllerBase
     
     [HttpDelete]
     [Authorize]
+    [Authorize(Policy = "ValidateToken")]
     [Route("dish/{dishId}")]
     [SwaggerOperation(Summary = "Decrease the number of dishes in the cart(if increase = true), or remove the dish completely(increase = false)")]
     public async Task DecreaseDishQuantityInCart(Guid dishId)

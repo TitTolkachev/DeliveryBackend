@@ -35,6 +35,7 @@ public class DishController : ControllerBase
 
     [HttpGet]
     [Authorize]
+    [Authorize(Policy = "ValidateToken")]
     [Route("{id}/rating/check")]
     [SwaggerOperation(Summary = "Checks if user is able to set rating of the dish")]
     public async Task<bool> CheckDishRating(Guid id)
@@ -44,6 +45,7 @@ public class DishController : ControllerBase
 
     [HttpPost]
     [Authorize]
+    [Authorize(Policy = "ValidateToken")]
     [Route("{id}/rating")]
     [SwaggerOperation(Summary = "Set a rating for a dish")]
     public async Task SetDishRating(Guid id, [FromQuery] int rating)

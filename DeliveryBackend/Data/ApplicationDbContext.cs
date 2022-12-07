@@ -10,6 +10,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Order> Orders { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Cart> Carts { get; set; }
+    public DbSet<Token> Tokens { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
@@ -36,5 +37,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Cart>()
             .Property(x=>x.OrderId)
             .IsRequired(false);
+
+        modelBuilder.Entity<Token>().HasKey(x => x.InvalidToken);
     }
 }
