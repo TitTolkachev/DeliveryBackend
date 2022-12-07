@@ -23,7 +23,9 @@ public class ValidateTokenRequirementHandler : AuthorizationHandler<ValidateToke
     {
         if (_httpContextAccessor.HttpContext != null)
         {
-            var authorizationString = _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Authorization];
+            string? authorizationString = _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Authorization];
+            if (authorizationString == null)
+                throw new Exception("Access token not found");
             var token = GetToken(authorizationString);
 
             using var scope = _serviceScopeFactory.CreateScope();

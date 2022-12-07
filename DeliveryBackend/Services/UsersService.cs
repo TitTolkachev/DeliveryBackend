@@ -84,7 +84,9 @@ public class UsersService : IUsersService
 
         if (alreadyExistsToken == null)
         {
-            _context.Tokens.Add(new Token { InvalidToken = token});
+            var handler = new JwtSecurityTokenHandler();
+            var expiredDate = handler.ReadJwtToken(token).ValidTo;
+            _context.Tokens.Add(new Token { InvalidToken = token, ExpiredDate = expiredDate});
             await _context.SaveChangesAsync();
         }
         else
