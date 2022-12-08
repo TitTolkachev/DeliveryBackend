@@ -1,5 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using DeliveryBackend.Configurations;
 using DeliveryBackend.Data;
 using DeliveryBackend.DTO;
@@ -25,8 +26,16 @@ public class UsersService : IUsersService
         //userRegisterModel.email = NormalizeAttribute(userRegisterModel.email);
         //userRegisterModel.fullName = NormalizeAttribute(userRegisterModel.fullName);
 
-
         //TODO (сделать проверку на уникальность входных данных)
+
+        byte[] salt;
+        RandomNumberGenerator.Create().GetBytes(salt = new byte[16]);
+        var pbkdf2 = new Rfc2898DeriveBytes(userRegisterModel.Password, salt, 100000);
+        var hash = pbkdf2.GetBytes(20);
+        var hashBytes = new byte[36];
+        Array.Copy(salt, 0, hashBytes, 0, 16);
+        Array.Copy(hash, 0, hashBytes, 16, 20);
+        var savedPasswordHash = Convert.ToBase64String(hashBytes);
 
         await _context.Users.AddAsync(new User
         {
@@ -36,7 +45,7 @@ public class UsersService : IUsersService
             Address = userRegisterModel.Address,
             Email = userRegisterModel.Email,
             Gender = userRegisterModel.Gender,
-            Password = userRegisterModel.Password,
+            Password = savedPasswordHash,
             PhoneNumber = userRegisterModel.PhoneNumber,
         });
         await _context.SaveChangesAsync();
@@ -86,7 +95,7 @@ public class UsersService : IUsersService
         {
             var handler = new JwtSecurityTokenHandler();
             var expiredDate = handler.ReadJwtToken(token).ValidTo;
-            _context.Tokens.Add(new Token { InvalidToken = token, ExpiredDate = expiredDate});
+            _context.Tokens.Add(new Token { InvalidToken = token, ExpiredDate = expiredDate });
             await _context.SaveChangesAsync();
         }
         else
@@ -144,20 +153,24 @@ public class UsersService : IUsersService
         await _context.SaveChangesAsync();
     }
 
-
     private async Task<ClaimsIdentity> GetIdentity(string email, string password)
     {
         var userEntity = await _context
             .Users
-            .Where(x => x.Email == email && x.Password == password)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(x => x.Email == email);
 
         if (userEntity == null)
         {
-            //TODO (сделать свой эксцепшн)
-            throw new Exception("Login failed");
+            //TODO(Exception)
+            throw new Exception("Unknown e-mail");
         }
-
+        
+        if (!CheckHashPassword(userEntity.Password, password))
+        {
+            //TODO(Exception)
+            throw new Exception("Invalid password");
+        }
+        
         var claims = new List<Claim>
         {
             new(ClaimsIdentity.DefaultNameClaimType, userEntity.Id.ToString())
@@ -172,5 +185,18 @@ public class UsersService : IUsersService
         );
 
         return claimsIdentity;
+    }
+
+    private static bool CheckHashPassword(string savedPasswordHash, string password)
+    {
+        var hashBytes = Convert.FromBase64String(savedPasswordHash);
+        var salt = new byte[16];
+        Array.Copy(hashBytes, 0, salt, 0, 16);
+        var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000);
+        var hash = pbkdf2.GetBytes(20);
+        for (var i = 0; i < 20; i++)
+            if (hashBytes[i + 16] != hash[i])
+                return false;
+        return true;
     }
 }
