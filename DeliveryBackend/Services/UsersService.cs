@@ -22,9 +22,7 @@ public class UsersService : IUsersService
 
     public async Task<TokenResponse> RegisterUser(UserRegisterModel userRegisterModel)
     {
-        //TODO (сделать нормализацию входных данных)
-        //userRegisterModel.email = NormalizeAttribute(userRegisterModel.email);
-        //userRegisterModel.fullName = NormalizeAttribute(userRegisterModel.fullName);
+        userRegisterModel.Email = NormalizeAttribute(userRegisterModel.Email);
 
         //TODO (сделать проверку на уникальность входных данных)
 
@@ -61,8 +59,7 @@ public class UsersService : IUsersService
 
     public async Task<TokenResponse> LoginUser(LoginCredentials credentials)
     {
-        //TODO (normilize)
-        //credentials.username = NormalizeAttribute(credentials.email);
+        credentials.Email = NormalizeAttribute(credentials.Email);
 
         var identity = await GetIdentity(credentials.Email, credentials.Password);
 
@@ -164,13 +161,13 @@ public class UsersService : IUsersService
             //TODO(Exception)
             throw new Exception("Unknown e-mail");
         }
-        
+
         if (!CheckHashPassword(userEntity.Password, password))
         {
             //TODO(Exception)
             throw new Exception("Invalid password");
         }
-        
+
         var claims = new List<Claim>
         {
             new(ClaimsIdentity.DefaultNameClaimType, userEntity.Id.ToString())
@@ -198,5 +195,10 @@ public class UsersService : IUsersService
             if (hashBytes[i + 16] != hash[i])
                 return false;
         return true;
+    }
+
+    private static string NormalizeAttribute(string value)
+    {
+        return value.ToLower().TrimEnd();
     }
 }
