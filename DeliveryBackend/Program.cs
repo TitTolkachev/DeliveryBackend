@@ -1,6 +1,7 @@
 using AutoMapper;
 using DeliveryBackend.Configurations;
 using DeliveryBackend.Data;
+using DeliveryBackend.Jobs;
 using DeliveryBackend.Mappings;
 using DeliveryBackend.Services;
 using DeliveryBackend.Services.Interfaces;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,6 +67,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
         };
     });
+
+// Quartz
+builder.Services.AddQuartz(q =>
+{
+    q.UseMicrosoftDependencyInjectionJobFactory();
+    var jobKey = new JobKey("DeleteInvalidTokensJob");
+    q.AddJob<DeleteInvalidTokensJob>(opts => opts.WithIdentity(jobKey));
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("DeleteInvalidTokensJob-trigger")
+        .WithCronSchedule("0 0 * ? * *") // Every hour
+        //.WithCronSchedule("0 * * ? * *") // Every minute
+    );
+});
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 // Build App
 var app = builder.Build();
