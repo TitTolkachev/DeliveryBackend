@@ -17,7 +17,6 @@ public class BasketService : IBasketService
 
     public async Task<List<DishBasketDto>> GetUserCart(Guid userId)
     {
-        //TODO(Накидать Exceptions)
         var dishList = await _context.Carts.Where(x => x.UserId == userId && x.OrderId == null).Join(
                 _context.Dishes,
                 c => c.DishId,
@@ -39,9 +38,17 @@ public class BasketService : IBasketService
 
     public async Task AddDishToCart(Guid dishId, Guid userId)
     {
-        //TODO(Накидать Exceptions)
+        if (await _context.Dishes.FirstOrDefaultAsync(x => x.Id == dishId) == null)
+        {
+            var ex = new Exception();
+            ex.Data.Add(StatusCodes.Status400BadRequest.ToString(),
+                "Dish not exists"
+            );
+            throw ex;
+        }
+        
         var dishCartEntity =
-            await _context.Carts.Where(x => x.UserId == userId && x.DishId == dishId).FirstOrDefaultAsync();
+            await _context.Carts.Where(x => x.UserId == userId && x.DishId == dishId && x.OrderId == null).FirstOrDefaultAsync();
 
         if (dishCartEntity == null)
         {
@@ -64,14 +71,25 @@ public class BasketService : IBasketService
 
     public async Task RemoveDishFromCart(Guid dishId, Guid userId)
     {
-        //TODO(Накидать Exceptions)
+        if (await _context.Dishes.FirstOrDefaultAsync(x => x.Id == dishId) == null)
+        {
+            var ex = new Exception();
+            ex.Data.Add(StatusCodes.Status400BadRequest.ToString(),
+                "Dish not exists"
+            );
+            throw ex;
+        }
+        
         var dishCartEntity =
-            await _context.Carts.Where(x => x.UserId == userId && x.DishId == dishId).FirstOrDefaultAsync();
+            await _context.Carts.Where(x => x.UserId == userId && x.DishId == dishId && x.OrderId == null).FirstOrDefaultAsync();
 
         if (dishCartEntity == null)
         {
-            //TODO(Exception)
-            throw new Exception("Exception |_|");
+            var ex = new Exception();
+            ex.Data.Add(StatusCodes.Status404NotFound.ToString(),
+                "Dish not found in cart"
+            );
+            throw ex;
         }
 
         dishCartEntity.Amount--;

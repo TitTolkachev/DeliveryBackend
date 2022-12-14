@@ -22,11 +22,9 @@ public class UsersService : IUsersService
 
     public async Task<TokenResponse> RegisterUser(UserRegisterModel userRegisterModel)
     {
-        //TODO (сделать нормализацию входных данных)
-        //userRegisterModel.email = NormalizeAttribute(userRegisterModel.email);
-        //userRegisterModel.fullName = NormalizeAttribute(userRegisterModel.fullName);
+        userRegisterModel.Email = NormalizeAttribute(userRegisterModel.Email);
 
-        //TODO (сделать проверку на уникальность входных данных)
+        await UniqueCheck(userRegisterModel);
 
         byte[] salt;
         RandomNumberGenerator.Create().GetBytes(salt = new byte[16]);
@@ -61,8 +59,7 @@ public class UsersService : IUsersService
 
     public async Task<TokenResponse> LoginUser(LoginCredentials credentials)
     {
-        //TODO (normilize)
-        //credentials.username = NormalizeAttribute(credentials.email);
+        credentials.Email = NormalizeAttribute(credentials.Email);
 
         var identity = await GetIdentity(credentials.Email, credentials.Password);
 
@@ -100,8 +97,11 @@ public class UsersService : IUsersService
         }
         else
         {
-            //TODO(Exception)
-            throw new Exception("Token is already invalid");
+            var ex = new Exception();
+            ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
+                "Token is already invalid"
+            );
+            throw ex;
         }
     }
 
@@ -111,22 +111,23 @@ public class UsersService : IUsersService
             .Users
             .FirstOrDefaultAsync(x => x.Id == userId);
 
-        if (userEntity == null)
-        {
-            //TODO(сделать эксцепшн)
-            throw new Exception("Lol, you're not found -_-");
-        }
-
-        return new UserDto
-        {
-            Id = userEntity.Id,
-            FullName = userEntity.FullName,
-            BirthDate = userEntity.BirthDate,
-            Gender = userEntity.Gender,
-            Address = userEntity.Address,
-            Email = userEntity.Email,
-            PhoneNumber = userEntity.PhoneNumber
-        };
+        if (userEntity != null)
+            return new UserDto
+            {
+                Id = userEntity.Id,
+                FullName = userEntity.FullName,
+                BirthDate = userEntity.BirthDate,
+                Gender = userEntity.Gender,
+                Address = userEntity.Address,
+                Email = userEntity.Email,
+                PhoneNumber = userEntity.PhoneNumber
+            };
+        
+        var ex = new Exception();
+        ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
+            "User not exists"
+        );
+        throw ex;
     }
 
 
@@ -138,11 +139,22 @@ public class UsersService : IUsersService
 
         if (userEntity == null)
         {
-            //TODO(сделать эксцепшн)
-            throw new Exception("Lol, you're not found -_-");
+            var ex = new Exception();
+            ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
+                "User not exists"
+            );
+            throw ex;
         }
 
-        //TODO (сделать все остальные проверки на входные данные)
+        //TODO (Раскомментировать, когда переделаю енамы)
+        // if (userEditModel.Gender != "Male" && userEditModel.Gender != "Female")
+        // {
+        //     var ex = new Exception();
+        //     ex.Data.Add(StatusCodes.Status400BadRequest.ToString(),
+        //         "Invalid Gender"
+        //     );
+        //     throw ex;
+        // }
 
         userEntity.FullName = userEditModel.FullName;
         userEntity.BirthDate = userEditModel.BirthDate;
@@ -161,16 +173,22 @@ public class UsersService : IUsersService
 
         if (userEntity == null)
         {
-            //TODO(Exception)
-            throw new Exception("Unknown e-mail");
+            var ex = new Exception();
+            ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
+                "User not exists"
+            );
+            throw ex;
         }
-        
+
         if (!CheckHashPassword(userEntity.Password, password))
         {
-            //TODO(Exception)
-            throw new Exception("Invalid password");
+            var ex = new Exception();
+            ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
+                "Wrong password"
+            );
+            throw ex;
         }
-        
+
         var claims = new List<Claim>
         {
             new(ClaimsIdentity.DefaultNameClaimType, userEntity.Id.ToString())
@@ -198,5 +216,28 @@ public class UsersService : IUsersService
             if (hashBytes[i + 16] != hash[i])
                 return false;
         return true;
+    }
+
+    private static string NormalizeAttribute(string value)
+    {
+        return value.ToLower().TrimEnd();
+    }
+
+    private async Task UniqueCheck(UserRegisterModel userRegisterModel)
+    {
+        var email = await _context
+            .Users
+            .Where(x => userRegisterModel.Email == x.Email)
+            .FirstOrDefaultAsync();
+
+        if (email != null)
+        {
+            var ex = new Exception(
+                $"{StatusCodes.Status409Conflict} - Account with email '{userRegisterModel.Email}' already exists");
+            ex.Data.Add(StatusCodes.Status409Conflict.ToString(),
+                $"Account with email '{userRegisterModel.Email}' already exists"
+            );
+            throw ex;
+        }
     }
 }
