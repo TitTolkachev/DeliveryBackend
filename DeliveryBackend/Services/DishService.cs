@@ -98,12 +98,14 @@ public class DishService : IDishService
 
             await _context.SaveChangesAsync();
         }
-
-        var ex = new Exception();
-        ex.Data.Add(StatusCodes.Status409Conflict.ToString(),
-            "Rating entity already exists"
-        );
-        throw ex;
+        else
+        {
+            var ex = new Exception();
+            ex.Data.Add(StatusCodes.Status409Conflict.ToString(),
+                "Rating entity already exists"
+            );
+            throw ex;
+        }
     }
 
     private async Task CheckDishInDb(Guid dishId)
@@ -141,7 +143,7 @@ public class DishService : IDishService
             return dishList.OrderByDescending(s => s.Price).ToList();
         if (orderBy == DishSorting.RatingAsc.ToString())
             return dishList.OrderBy(s => s.Rating).ToList();
-        return orderBy == DishSorting.RatingDesc.ToString() 
+        return orderBy == DishSorting.RatingDesc.ToString()
             ? dishList.OrderByDescending(s => s.Rating).ToList()
             : dishList.OrderBy(s => s.Name).ToList();
     }
@@ -154,7 +156,8 @@ public class DishService : IDishService
                 && category != DishCategory.Drink.ToString()
                 && category != DishCategory.Soup.ToString()
                 && category != DishCategory.Wok.ToString()
-                && category != DishCategory.Pizza.ToString())
+                && category != DishCategory.Pizza.ToString()
+                && !category.IsNullOrEmpty())
             {
                 var ex = new Exception();
                 ex.Data.Add(StatusCodes.Status400BadRequest.ToString(),
@@ -164,10 +167,25 @@ public class DishService : IDishService
             }
 
             if (category.IsNullOrEmpty())
+            {
+                if (dishListQuery.Vegetarian == null)
+                    return await _context.Dishes.ToListAsync();
                 return await _context.Dishes.Where(x =>
                     dishListQuery.Vegetarian == x.Vegetarian).ToListAsync();
+            }
         }
 
+        if (dishListQuery.Categories.IsNullOrEmpty())
+        {
+            if (dishListQuery.Vegetarian == null)
+                return await _context.Dishes.ToListAsync();
+            return await _context.Dishes.Where(x =>
+                dishListQuery.Vegetarian == x.Vegetarian).ToListAsync();
+        }
+
+        if (dishListQuery.Vegetarian == null)
+            return await _context.Dishes.Where(x =>
+                dishListQuery.Categories.Contains(x.Category)).ToListAsync();
         return await _context.Dishes.Where(x =>
             dishListQuery.Categories.Contains(x.Category) &&
             dishListQuery.Vegetarian == x.Vegetarian).ToListAsync();

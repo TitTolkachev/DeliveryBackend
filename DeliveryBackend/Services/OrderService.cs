@@ -132,7 +132,7 @@ public class OrderService : IOrderService
             Id = orderId,
             DeliveryTime = orderCreateDto.DeliveryTime,
             OrderTime = DateTime.UtcNow,
-            Status = OrderStatus.InProcess,
+            Status = OrderStatus.InProcess.ToString(),
             Price = price,
             Address = orderCreateDto.Address,
             UserId = userId
@@ -164,7 +164,7 @@ public class OrderService : IOrderService
             throw ex;
         }
 
-        order.Status = OrderStatus.Delivered;
+        order.Status = OrderStatus.Delivered.ToString();
         await _context.SaveChangesAsync();
     }
 
