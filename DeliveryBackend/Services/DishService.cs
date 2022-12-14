@@ -3,9 +3,9 @@ using DeliveryBackend.Data;
 using DeliveryBackend.DTO;
 using DeliveryBackend.DTO.Queries;
 using DeliveryBackend.Data.Models.Entities;
+using DeliveryBackend.Data.Models.Enums;
 using DeliveryBackend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace DeliveryBackend.Services;
 
@@ -23,17 +23,30 @@ public class DishService : IDishService
     public async Task<DishPagedListDto> GetDishList(GetDishListQuery dishListQuery)
     {
         //TODO(Сделать так, чтобы возвращалась по параметрам из запроса, а не все подряд)
-        var dishes = await _context.Dishes.ToListAsync();
+        var dishList = await _context.Dishes.Where(x =>
+            dishListQuery.Categories.Contains(x.Category) &&
+            dishListQuery.Vegetarian == x.Vegetarian).ToListAsync();
 
-        //TODO(в паганиции возвращать тоже адекватные значения)
+        var dishesOrdered = dishListQuery.Sorting switch
+        {
+            DishSorting.NameAsc => dishList.OrderBy(s => s.Name),
+            DishSorting.NameDesc => dishList.OrderByDescending(s => s.Name),
+            DishSorting.PriceAsc => dishList.OrderBy(s => s.Price),
+            DishSorting.PriceDesc => dishList.OrderByDescending(s => s.Price),
+            DishSorting.RatingAsc => dishList.OrderBy(s => s.Rating),
+            DishSorting.RatingDesc => dishList.OrderByDescending(s => s.Rating),
+            _ => dishList.OrderBy(s => s.Name)
+        };
+        var dishes = dishesOrdered.Skip((dishListQuery.Page - 1) * 5).Take(Range.EndAt(5)) .ToList();
+
         var pagination = new PageInfoModel
         {
-            Size = 1,
-            Count = 1,
-            Current = 1
+            Size = dishes.Count,
+            Count = dishList.Count,
+            Current = dishListQuery.Page
         };
 
-        if (!dishes.IsNullOrEmpty())
+        if (pagination.Current <= pagination.Count && pagination.Current > 0)
             return new DishPagedListDto
             {
                 Dishes = _mapper.Map<List<DishDto>>(dishes),
@@ -41,8 +54,8 @@ public class DishService : IDishService
             };
 
         var ex = new Exception();
-        ex.Data.Add(StatusCodes.Status404NotFound.ToString(),
-            "Page not found"
+        ex.Data.Add(StatusCodes.Status400BadRequest.ToString(),
+            "Invalid value for attribute page"
         );
         throw ex;
     }
@@ -85,6 +98,14 @@ public class DishService : IDishService
                 UserId = userId,
                 RatingScore = rating
             });
+
+            await _context.SaveChangesAsync();
+
+            var dishEntity = await _context.Dishes.FirstOrDefaultAsync(x => x.Id == id);
+            var dishRatingList = await _context.Ratings.Where(x => x.DishId == id).ToListAsync();
+            var sum = dishRatingList.Sum(r => r.RatingScore);
+            dishEntity!.Rating = sum / dishRatingList.Count;
+
             await _context.SaveChangesAsync();
         }
 
