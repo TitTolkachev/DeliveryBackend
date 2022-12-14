@@ -73,16 +73,19 @@ public class DishService : IDishService
 
     public async Task<bool> CheckDishRating(Guid id, Guid userId)
     {
-        //TODO(Слелать проверку на коррентные id и рейтинг)
+        await CheckDishInDb(id);
+
         var ratingEntity = await _context.Ratings.FirstOrDefaultAsync(x => x.DishId == id && x.UserId == userId);
         return ratingEntity == null;
     }
 
     public async Task SetDishRating(Guid id, int rating, Guid userId)
     {
+        CheckRating(rating);
+        await CheckDishInDb(id);
+
         if (await CheckDishRating(id, userId))
         {
-            //TODO(Слелать проверку на коррентные id и рейтинг)
             _context.Ratings.Add(new Rating
             {
                 Id = Guid.NewGuid(),
@@ -116,5 +119,27 @@ public class DishService : IDishService
                 Vegetarian = dishEntity.Vegetarian
             })
             .ToList();
+    }
+
+    private async Task CheckDishInDb(Guid dishId)
+    {
+        if (await _context.Dishes.FirstOrDefaultAsync(x => x.Id == dishId) == null)
+        {
+            var ex = new Exception();
+            ex.Data.Add(StatusCodes.Status404NotFound.ToString(),
+                "Dish entity not found"
+            );
+            throw ex;
+        }
+    }
+    
+    private static void CheckRating(int rating)
+    {
+        if (rating is >= 0 and <= 10) return;
+        var e = new Exception();
+        e.Data.Add(StatusCodes.Status400BadRequest.ToString(),
+            "Bad Request, Rating range is 0-10"
+        );
+        throw e;
     }
 }
