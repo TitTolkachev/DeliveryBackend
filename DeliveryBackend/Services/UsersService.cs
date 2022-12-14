@@ -40,6 +40,7 @@ public class UsersService : IUsersService
         var savedPasswordHash = Convert.ToBase64String(hashBytes);
 
         CheckGender(userRegisterModel.Gender);
+        CheckBirthDate(userRegisterModel.BirthDate);
 
         await _context.Users.AddAsync(new User
         {
@@ -143,6 +144,7 @@ public class UsersService : IUsersService
         }
 
         CheckGender(userEditModel.Gender);
+        CheckBirthDate(userEditModel.BirthDate);
 
         userEntity.FullName = userEditModel.FullName;
         userEntity.BirthDate = userEditModel.BirthDate;
@@ -235,6 +237,16 @@ public class UsersService : IUsersService
         var ex = new Exception();
         ex.Data.Add(StatusCodes.Status409Conflict.ToString(),
             $"Possible Gender values: {Gender.Male.ToString()}, {Gender.Female.ToString()}");
+        throw ex;
+    }
+
+    private static void CheckBirthDate(DateTime? birthDate)
+    {
+        if (birthDate == null || birthDate <= DateTime.Now) return;
+
+        var ex = new Exception();
+        ex.Data.Add(StatusCodes.Status409Conflict.ToString(),
+            "Birth date can't be later than today");
         throw ex;
     }
 }
