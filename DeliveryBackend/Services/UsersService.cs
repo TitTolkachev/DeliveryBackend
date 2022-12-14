@@ -1,10 +1,12 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using AutoMapper;
 using DeliveryBackend.Configurations;
 using DeliveryBackend.Data;
 using DeliveryBackend.DTO;
 using DeliveryBackend.Data.Models.Entities;
+using DeliveryBackend.Data.Models.Enums;
 using DeliveryBackend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -14,10 +16,12 @@ namespace DeliveryBackend.Services;
 public class UsersService : IUsersService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IMapper _mapper;
 
-    public UsersService(ApplicationDbContext context)
+    public UsersService(ApplicationDbContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     public async Task<TokenResponse> RegisterUser(UserRegisterModel userRegisterModel)
@@ -34,6 +38,8 @@ public class UsersService : IUsersService
         Array.Copy(salt, 0, hashBytes, 0, 16);
         Array.Copy(hash, 0, hashBytes, 16, 20);
         var savedPasswordHash = Convert.ToBase64String(hashBytes);
+
+        CheckGender(userRegisterModel.Gender);
 
         await _context.Users.AddAsync(new User
         {
@@ -112,24 +118,14 @@ public class UsersService : IUsersService
             .FirstOrDefaultAsync(x => x.Id == userId);
 
         if (userEntity != null)
-            return new UserDto
-            {
-                Id = userEntity.Id,
-                FullName = userEntity.FullName,
-                BirthDate = userEntity.BirthDate,
-                Gender = userEntity.Gender,
-                Address = userEntity.Address,
-                Email = userEntity.Email,
-                PhoneNumber = userEntity.PhoneNumber
-            };
-        
+            return _mapper.Map<UserDto>(userEntity);
+
         var ex = new Exception();
         ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
             "User not exists"
         );
         throw ex;
     }
-
 
     public async Task EditUserProfile(Guid userId, UserEditModel userEditModel)
     {
@@ -146,15 +142,7 @@ public class UsersService : IUsersService
             throw ex;
         }
 
-        //TODO (Раскомментировать, когда переделаю енамы)
-        // if (userEditModel.Gender != "Male" && userEditModel.Gender != "Female")
-        // {
-        //     var ex = new Exception();
-        //     ex.Data.Add(StatusCodes.Status400BadRequest.ToString(),
-        //         "Invalid Gender"
-        //     );
-        //     throw ex;
-        // }
+        CheckGender(userEditModel.Gender);
 
         userEntity.FullName = userEditModel.FullName;
         userEntity.BirthDate = userEditModel.BirthDate;
@@ -232,12 +220,21 @@ public class UsersService : IUsersService
 
         if (email != null)
         {
-            var ex = new Exception(
-                $"{StatusCodes.Status409Conflict} - Account with email '{userRegisterModel.Email}' already exists");
+            var ex = new Exception();
             ex.Data.Add(StatusCodes.Status409Conflict.ToString(),
                 $"Account with email '{userRegisterModel.Email}' already exists"
             );
             throw ex;
         }
+    }
+
+    private static void CheckGender(string gender)
+    {
+        if (gender == Gender.Male.ToString() || gender == Gender.Female.ToString()) return;
+
+        var ex = new Exception();
+        ex.Data.Add(StatusCodes.Status409Conflict.ToString(),
+            $"Possible Gender values: {Gender.Male.ToString()}, {Gender.Female.ToString()}");
+        throw ex;
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using DeliveryBackend.Data.Models.Enums;
 
 namespace DeliveryBackend.Data.Models.Entities;
 
@@ -11,7 +10,7 @@ public class User
     public string FullName { get; set; }
     public DateTime? BirthDate { get; set; }
     [Required]
-    public Gender Gender { get; set; }
+    public string Gender { get; set; }
     [Phone]
     public string? PhoneNumber { get; set; }
     [Required]

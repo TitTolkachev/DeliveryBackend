@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using DeliveryBackend.Data.Models.Enums;
 
 namespace DeliveryBackend.DTO;
 
@@ -11,7 +10,7 @@ public class UserDto
     public string FullName { get; set; }
     public DateTime? BirthDate { get; set; }
     [Required]
-    public Gender Gender { get; set; }
+    public string Gender { get; set; }
     public string? Address { get; set; }
     [MinLength(1)]
     [EmailAddress]
