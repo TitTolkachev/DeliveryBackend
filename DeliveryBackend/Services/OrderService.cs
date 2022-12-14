@@ -126,19 +126,19 @@ public class OrderService : IOrderService
         // В бд всем товарам в корзине проставить, что теперь они в заказе,
         // заодно посчитать стоимость
         var orderId = Guid.NewGuid();
-        var price = await CreateOrderOperations(orderId, cartDishes);
         var newOrder = new Order
         {
             Id = orderId,
             DeliveryTime = orderCreateDto.DeliveryTime,
             OrderTime = DateTime.UtcNow,
             Status = OrderStatus.InProcess.ToString(),
-            Price = price,
+            Price = 0,
             Address = orderCreateDto.Address,
             UserId = userId
         };
         await _context.Orders.AddAsync(newOrder);
         await _context.SaveChangesAsync();
+        newOrder.Price = await CreateOrderOperations(orderId, cartDishes);
         await _context.SaveChangesAsync();
     }
 

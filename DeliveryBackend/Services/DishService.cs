@@ -71,14 +71,21 @@ public class DishService : IDishService
         await CheckDishInDb(id);
 
         var ratingEntity = await _context.Ratings.FirstOrDefaultAsync(x => x.DishId == id && x.UserId == userId);
-        return ratingEntity == null;
+        return ratingEntity == null && await IsDishOrdered(id, userId);
     }
 
     public async Task SetDishRating(Guid id, int rating, Guid userId)
     {
         CheckRating(rating);
         await CheckDishInDb(id);
-
+        if(!await IsDishOrdered(id, userId))
+        {
+            var ex = new Exception();
+            ex.Data.Add(StatusCodes.Status400BadRequest.ToString(),
+                "User can't set rating on dish that wasn't ordered"
+            );
+            throw ex;
+        }
         if (await CheckDishRating(id, userId))
         {
             _context.Ratings.Add(new Rating
@@ -128,6 +135,22 @@ public class DishService : IDishService
             "Bad Request, Rating range is 0-10"
         );
         throw e;
+    }
+
+    private async Task<bool> IsDishOrdered(Guid id, Guid userId)
+    {
+        var carts = await _context.Carts.Where(x => x.DishId == id
+        && x.UserId == userId && x.OrderId != null).ToListAsync();
+        
+        foreach (var cart in carts)
+        {
+            if (await _context.Orders.FirstOrDefaultAsync(x=>
+                    x.UserId == userId && x.Id == cart.OrderId && 
+                    x.Status == OrderStatus.Delivered.ToString()) != null)
+                return true;
+        }
+
+        return false;
     }
 
     private static IEnumerable<Dish> OrderDishes(GetDishListQuery dishListQuery, IEnumerable<Dish> dishList)
