@@ -137,4 +137,12 @@ public class DishService : IDishService
         );
         throw e;
     }
+    
+    // --------------------------------------------------------------
+    // --------------------------------------------------------------
+    public async Task AddDishes(List<DishDto> dishes)
+    {
+        _context.Dishes.AddRange(_mapper.Map<List<Dish>>(dishes));
+        await _context.SaveChangesAsync();
+    }
 }

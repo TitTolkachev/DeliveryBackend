@@ -52,4 +52,14 @@ public class DishController : ControllerBase
     {
         await _dishService.SetDishRating(id, rating, Guid.Parse(User.Identity.Name));
     }
+    
+    
+    // --------------------
+    // --------------------
+    [HttpPost]
+    [SwaggerOperation(Summary = "~*!EXTRA!*~ (ADD DISHES)")]
+    public async Task AddDishes([FromBody] List<DishDto> dishes)
+    {
+        await _dishService.AddDishes(dishes);
+    }
 }
