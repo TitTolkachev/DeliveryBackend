@@ -4,6 +4,7 @@ using DeliveryBackend.DTO.Queries;
 using DeliveryBackend.Data.Models.Entities;
 using DeliveryBackend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace DeliveryBackend.Services;
 
@@ -29,11 +30,18 @@ public class DishService : IDishService
             Current = 1
         };
 
-        return new DishPagedListDto
-        {
-            Dishes = ConvertDishes(dishes),
-            Pagination = pagination
-        };
+        if (!dishes.IsNullOrEmpty())
+            return new DishPagedListDto
+            {
+                Dishes = ConvertDishes(dishes),
+                Pagination = pagination
+            };
+
+        var ex = new Exception();
+        ex.Data.Add(StatusCodes.Status404NotFound.ToString(),
+            "Page not found"
+        );
+        throw ex;
     }
 
     public async Task<DishDto> GetDish(Guid id)
@@ -42,24 +50,25 @@ public class DishService : IDishService
             .Where(x => x.Id == id)
             .FirstOrDefaultAsync();
 
-        //TODO(Exception)
-        if (dishEntity == null)
-        {
-            throw new KeyNotFoundException("Lol");
-        }
+        if (dishEntity != null)
+            return new DishDto
+            {
+                Category = dishEntity.Category,
+                Description = dishEntity.Description,
+                Id = dishEntity.Id,
+                Image = dishEntity.Image,
+                Name = dishEntity.Name,
+                Price = dishEntity.Price,
+                //TODO(Высчитывать рейтинг, либо сразу хранить его в бд)
+                Rating = dishEntity.Price,
+                Vegetarian = dishEntity.Vegetarian
+            };
 
-        return new DishDto
-        {
-            Category = dishEntity.Category,
-            Description = dishEntity.Description,
-            Id = dishEntity.Id,
-            Image = dishEntity.Image,
-            Name = dishEntity.Name,
-            Price = dishEntity.Price,
-            //TODO(Высчитывать рейтинг, либо сразу хранить его в бд)
-            Rating = dishEntity.Price,
-            Vegetarian = dishEntity.Vegetarian
-        };
+        var ex = new Exception();
+        ex.Data.Add(StatusCodes.Status404NotFound.ToString(),
+            "Dish entity not found"
+        );
+        throw ex;
     }
 
     public async Task<bool> CheckDishRating(Guid id, Guid userId)
@@ -68,11 +77,10 @@ public class DishService : IDishService
         var ratingEntity = await _context.Ratings.FirstOrDefaultAsync(x => x.DishId == id && x.UserId == userId);
         return ratingEntity == null;
     }
-    
+
     public async Task SetDishRating(Guid id, int rating, Guid userId)
     {
-        var ratingEntity = await _context.Ratings.FirstOrDefaultAsync(x => x.DishId == id && x.UserId == userId);
-        if (ratingEntity == null)
+        if (await CheckDishRating(id, userId))
         {
             //TODO(Слелать проверку на коррентные id и рейтинг)
             _context.Ratings.Add(new Rating
@@ -84,21 +92,17 @@ public class DishService : IDishService
             });
             await _context.SaveChangesAsync();
         }
-        else
-        {
-            //TODO(Exception)
-            throw new Exception("*_*");
-        }
+
+        var ex = new Exception();
+        ex.Data.Add(StatusCodes.Status409Conflict.ToString(),
+            "Rating entity already exists"
+        );
+        throw ex;
     }
 
-    private static List<DishDto> ConvertDishes(List<Dish> dishes)
+    private static List<DishDto> ConvertDishes(IEnumerable<Dish> dishes)
     {
-        if (dishes == null)
-        {
-            //TODO(Exception)
-            throw new Exception("LoL )_(");
-        }
-
+        //TODO(Скорее всего можно заавтомаппить)
         return dishes.Select(dishEntity => new DishDto
             {
                 Category = dishEntity.Category,
