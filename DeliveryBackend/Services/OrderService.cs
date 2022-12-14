@@ -32,6 +32,15 @@ public class OrderService : IOrderService
             throw ex;
         }
 
+        if (orderInfo.UserId != userId)
+        {
+            var ex = new Exception();
+            ex.Data.Add(StatusCodes.Status403Forbidden.ToString(),
+                "Invalid order owner"
+            );
+            throw ex;
+        }
+
         var orderCarts = await _context.Carts.Where(x => x.OrderId == orderId).ToListAsync();
         if (orderCarts.IsNullOrEmpty())
         {
