@@ -10,7 +10,7 @@ public class ValidateTokenRequirementHandler : AuthorizationHandler<ValidateToke
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    
+
     public ValidateTokenRequirementHandler(IHttpContextAccessor httpContextAccessor,
         IServiceScopeFactory serviceScopeFactory)
     {
@@ -25,29 +25,42 @@ public class ValidateTokenRequirementHandler : AuthorizationHandler<ValidateToke
         {
             string? authorizationString = _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Authorization];
             if (authorizationString == null)
-                throw new Exception("Access token not found");
+            {
+                var ex = new Exception();
+                ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
+                    "Access token not found"
+                );
+                throw ex;
+            }
+
             var token = GetToken(authorizationString);
 
             using var scope = _serviceScopeFactory.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            
+
             var tokenEntity = await dbContext
                 .Tokens
                 .Where(x => x.InvalidToken == token)
                 .FirstOrDefaultAsync();
-            
+
             if (tokenEntity != null)
             {
-                //TODO(Exception)
-                throw new Exception("Not authorized");
+                var ex = new Exception();
+                ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
+                    "Not authorized"
+                );
+                throw ex;
             }
 
             context.Succeed(requirement);
         }
         else
         {
-            //TODO(Exception)
-            throw new Exception("Bad request");
+            var ex = new Exception();
+            ex.Data.Add(StatusCodes.Status400BadRequest.ToString(),
+                "Bad request"
+            );
+            throw ex;
         }
     }
 
@@ -59,17 +72,14 @@ public class ValidateTokenRequirementHandler : AuthorizationHandler<ValidateToke
 
         if (matches.Count <= 0)
         {
-            //TODO(Exception)
-            throw new Exception("Not authorized");
+            var ex = new Exception();
+            ex.Data.Add(StatusCodes.Status401Unauthorized.ToString(),
+                "Not authorized"
+            );
+            throw ex;
         }
 
         var token = matches[0].Value;
-
-        if (token == null)
-        {
-            //TODO(Exception)
-            throw new Exception("Not authorized");
-        }
 
         return token;
     }
