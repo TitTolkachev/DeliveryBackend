@@ -17,7 +17,7 @@ public class Dish
     [Required]
     public bool Vegetarian { get; set; }
     [Required]
-    public DishCategory Category { get; set; }
+    public string Category { get; set; }
     
     public List<Cart> Carts { get; set; }
     public List<Rating> Ratings { get; set; }

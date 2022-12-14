@@ -6,6 +6,7 @@ using DeliveryBackend.Data.Models.Entities;
 using DeliveryBackend.Data.Models.Enums;
 using DeliveryBackend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace DeliveryBackend.Services;
 
@@ -22,27 +23,16 @@ public class DishService : IDishService
 
     public async Task<DishPagedListDto> GetDishList(GetDishListQuery dishListQuery)
     {
-        //TODO(Сделать так, чтобы возвращалась по параметрам из запроса, а не все подряд)
-        var dishList = await _context.Dishes.Where(x =>
-            dishListQuery.Categories.Contains(x.Category) &&
-            dishListQuery.Vegetarian == x.Vegetarian).ToListAsync();
+        var dishList = await GetDishesByDishListQuery(dishListQuery);
 
-        var dishesOrdered = dishListQuery.Sorting switch
-        {
-            DishSorting.NameAsc => dishList.OrderBy(s => s.Name),
-            DishSorting.NameDesc => dishList.OrderByDescending(s => s.Name),
-            DishSorting.PriceAsc => dishList.OrderBy(s => s.Price),
-            DishSorting.PriceDesc => dishList.OrderByDescending(s => s.Price),
-            DishSorting.RatingAsc => dishList.OrderBy(s => s.Rating),
-            DishSorting.RatingDesc => dishList.OrderByDescending(s => s.Rating),
-            _ => dishList.OrderBy(s => s.Name)
-        };
-        var dishes = dishesOrdered.Skip((dishListQuery.Page - 1) * 5).Take(Range.EndAt(5)) .ToList();
+        var dishesOrdered = OrderDishes(dishListQuery, dishList);
+
+        var dishes = dishesOrdered.Skip((dishListQuery.Page - 1) * 5).Take(Range.EndAt(5)).ToList();
 
         var pagination = new PageInfoModel
         {
             Size = dishes.Count,
-            Count = dishList.Count,
+            Count = (dishList.Count + 4) / 5,
             Current = dishListQuery.Page
         };
 
@@ -137,7 +127,52 @@ public class DishService : IDishService
         );
         throw e;
     }
-    
+
+    private static IEnumerable<Dish> OrderDishes(GetDishListQuery dishListQuery, IEnumerable<Dish> dishList)
+    {
+        var orderBy = dishListQuery.Sorting;
+        if (orderBy == DishSorting.NameAsc.ToString())
+            return dishList.OrderBy(s => s.Name).ToList();
+        if (orderBy == DishSorting.NameDesc.ToString())
+            return dishList.OrderByDescending(s => s.Name).ToList();
+        if (orderBy == DishSorting.PriceAsc.ToString())
+            return dishList.OrderBy(s => s.Price).ToList();
+        if (orderBy == DishSorting.PriceDesc.ToString())
+            return dishList.OrderByDescending(s => s.Price).ToList();
+        if (orderBy == DishSorting.RatingAsc.ToString())
+            return dishList.OrderBy(s => s.Rating).ToList();
+        return orderBy == DishSorting.RatingDesc.ToString() 
+            ? dishList.OrderByDescending(s => s.Rating).ToList()
+            : dishList.OrderBy(s => s.Name).ToList();
+    }
+
+    private async Task<List<Dish>> GetDishesByDishListQuery(GetDishListQuery dishListQuery)
+    {
+        foreach (var category in dishListQuery.Categories)
+        {
+            if (category != DishCategory.Dessert.ToString()
+                && category != DishCategory.Drink.ToString()
+                && category != DishCategory.Soup.ToString()
+                && category != DishCategory.Wok.ToString()
+                && category != DishCategory.Pizza.ToString())
+            {
+                var ex = new Exception();
+                ex.Data.Add(StatusCodes.Status400BadRequest.ToString(),
+                    $"Dish Category {category} is not available"
+                );
+                throw ex;
+            }
+
+            if (category.IsNullOrEmpty())
+                return await _context.Dishes.Where(x =>
+                    dishListQuery.Vegetarian == x.Vegetarian).ToListAsync();
+        }
+
+        return await _context.Dishes.Where(x =>
+            dishListQuery.Categories.Contains(x.Category) &&
+            dishListQuery.Vegetarian == x.Vegetarian).ToListAsync();
+    }
+
     // --------------------------------------------------------------
     // --------------------------------------------------------------
     public async Task AddDishes(List<DishDto> dishes)

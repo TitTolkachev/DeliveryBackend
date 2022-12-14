@@ -17,5 +17,5 @@ public class DishDto
     public bool Vegetarian { get; set; }
     public double? Rating { get; set; }
     [Required]
-    public DishCategory Category { get; set; }
+    public string Category { get; set; }
 }
