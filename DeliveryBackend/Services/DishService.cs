@@ -101,7 +101,7 @@ public class DishService : IDishService
             var dishEntity = await _context.Dishes.FirstOrDefaultAsync(x => x.Id == id);
             var dishRatingList = await _context.Ratings.Where(x => x.DishId == id).ToListAsync();
             var sum = dishRatingList.Sum(r => r.RatingScore);
-            dishEntity!.Rating = sum / dishRatingList.Count;
+            dishEntity!.Rating = (double) sum / dishRatingList.Count;
 
             await _context.SaveChangesAsync();
         }

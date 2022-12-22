@@ -78,8 +78,7 @@ builder.Services.AddQuartz(q =>
     q.AddTrigger(opts => opts
         .ForJob(jobKey)
         .WithIdentity("DeleteInvalidTokensJob-trigger")
-        .WithCronSchedule("0 0 * ? * *") // Every hour
-        //.WithCronSchedule("0 * * ? * *") // Every minute
+        .WithCronSchedule("0 0 0 ? * *")
     );
 });
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
